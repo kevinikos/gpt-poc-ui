@@ -1,16 +1,39 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+  <div class="window">
+    <h2>Ask question</h2>
+    <label for="textarea">
+      <textarea name="textarea" v-model="input"></textarea>
+    </label>
+    <button @click="onClick">Send</button>
+  </div>
+  <div class="result">
+    <div class="result__item" v-for="(result, index) in results" :key="index">
+      <p v-if="result._additional.answer.hasAnswer" v-html="result._additional.answer.result" />
+      <span v-else>No answer</span>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import HelloWorld from './components/HelloWorld.vue';
+import { defineComponent, ref } from 'vue';
+import fetchData from './services';
 
 export default defineComponent({
   name: 'App',
-  components: {
-    HelloWorld,
+  setup() {
+    const input = ref('');
+    const results = ref([]);
+
+    const onClick = async () => {
+      const { data } = await fetchData(input.value);
+      results.value = data.data.Get.FeedItem;
+    };
+
+    return {
+      input,
+      results,
+      onClick,
+    };
   },
 });
 </script>
@@ -23,5 +46,11 @@ export default defineComponent({
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+
+.window {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
 }
 </style>
