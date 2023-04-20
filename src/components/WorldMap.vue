@@ -136,7 +136,7 @@ const highlightCountry = (map: MapLibreGLMap, countryIso: string) => {
     type: 'fill',
     source: SOURCE_NAME,
     paint: {
-      'fill-color': '#FF0000',
+      'fill-color': '#6652e4',
       'fill-opacity': 0.3,
     },
     filter: getCountryFilter(countryIso),

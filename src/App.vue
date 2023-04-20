@@ -53,6 +53,13 @@ body {
   text-align: center;
   color: #2c3e50;
 }
+
+#modal {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #2c3e50;
+}
 </style>
 
 <style lang="scss" scoped>
@@ -78,7 +85,6 @@ body {
 .sidebar {
   z-index: 1;
   isolation: isolate;
-  box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
 }
 </style>
 
