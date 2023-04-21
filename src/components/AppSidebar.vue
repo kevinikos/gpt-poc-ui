@@ -21,7 +21,7 @@
           class="sidebar__destination"
           @click="showSummary(destination)"
           v-for="(destination, index) in destinations"
-          :color="getDangerousLevelColor(destination)"
+          :color="getDangerLevelColor(destination)"
         >
           <template v-if="editedDestination.index === index">
             <form
@@ -67,7 +67,17 @@
     </app-button>
 
     <AppModal v-if="summaryModal.visible" :key="summaryModal.key">
-      <h3>{{ summaryModal.title }}</h3>
+      <header class="summary-modal__header">
+        <h3>{{ summaryModal.title }}</h3>
+        <div>
+          Risk level: {{ summaryModal.riskLevel.value }}
+          <font-awesome-icon
+            class="summary-modal__risk-level-icon"
+            :icon="['fas', 'circle']"
+            :style="{ color: summaryModal.riskLevel.color }"
+          />
+        </div>
+      </header>
       <h4>Found risks</h4>
       <p>
         {{ summaryModal.content }}
@@ -88,7 +98,9 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, reactive, ref } from 'vue';
+import {
+  defineEmits, reactive, ref, watch,
+} from 'vue';
 import { countriesIsoAlpha3 } from '@/constants/countriesIso';
 import AppModal from '@/components/AppModal.vue';
 import AppButton from '@/components/AppButton.vue';
@@ -98,12 +110,17 @@ import { useApiProxy } from '@/composables/useApiProxy';
 import { SummaryItem } from '@/services/apiProxy';
 
 const emit = defineEmits<{(event: 'add:destination', iso: string): void;
-  (event: 'remove:destination', iso: string): void
+  (event: 'remove:destination', iso: string): void;
+  (event: 'adjust-color:destination', iso: string, color?: string): void;
   }>();
 
 const newDestination = ref<string>('');
 const destinations = reactive<Destination[]>([]);
 const editedDestination = reactive<EditedDestination>({ name: '', iso: '', index: -1 });
+
+const {
+  fetchSummary, removeDSummaryFromRecord, summary, isSummaryLoading,
+} = useApiProxy();
 
 const addDestination = () => {
   if (!newDestination.value) return;
@@ -132,6 +149,7 @@ const removeDestination = (index: number) => {
     destination.iso === removedDestination.iso));
   if (!matchingDestination) {
     emit('remove:destination', removedDestination.iso);
+    removeDSummaryFromRecord(removedDestination.name);
   }
 };
 
@@ -165,13 +183,56 @@ const updateDestination = () => {
     destination.iso === editedDestination.iso));
   if (!matchingDestination) {
     emit('remove:destination', editedDestination.iso);
+    removeDSummaryFromRecord(editedDestination.name);
   }
   emit('add:destination', destinationIso);
 };
 
-const { fetchSummary, summary, isSummaryLoading } = useApiProxy();
-
 const prepareSummary = () => fetchSummary(destinations);
+
+const getDestinationSummary = (destination: Destination): SummaryItem | undefined => {
+  if (summary.value.type !== 'SUCCESS') return undefined;
+
+  return summary.value.data[destination.name.toLowerCase()];
+};
+
+const getDangerLevelColor = (destination: Destination): string => {
+  const dangerLevelColors: Record<string, string> = {
+    1: '#00CC66',
+    2: '#32CD32',
+    3: '#66CD00',
+    4: '#99CC00',
+    5: '#CCCC00',
+    6: '#FFD700',
+    7: '#FFA500',
+    8: '#FF8C00',
+    9: '#FF6347',
+    10: '#FF0000',
+  };
+
+  const destinationSummary = getDestinationSummary(destination);
+  if (!destinationSummary) return '';
+
+  return dangerLevelColors[destinationSummary.dangerous_level];
+};
+
+watch(summary, (newSummary) => {
+  if (newSummary.type !== 'SUCCESS') return;
+
+  Object.values(newSummary.data).forEach((item) => {
+    const destinationIso = countriesIsoAlpha3[item.country];
+    if (!destinationIso) {
+      // @TODO display notification
+      console.error('Count not find ISO for given country:', item.country);
+      return;
+    }
+
+    emit('adjust-color:destination', destinationIso, getDangerLevelColor({
+      name: item.country,
+      iso: destinationIso,
+    }));
+  });
+});
 
 type SummaryModalContent = {
   key: number;
@@ -179,6 +240,10 @@ type SummaryModalContent = {
   title: string;
   content: string;
   links: string[];
+  riskLevel: {
+    value: string;
+    color: string;
+  };
 }
 
 const summaryModal = reactive<SummaryModalContent>({
@@ -187,6 +252,10 @@ const summaryModal = reactive<SummaryModalContent>({
   title: '',
   content: '',
   links: [],
+  riskLevel: {
+    value: '',
+    color: '',
+  },
 });
 
 type ErrorModal = {
@@ -202,12 +271,6 @@ const errorModal = reactive<ErrorModal>({
   title: '',
   content: '',
 });
-
-const getDestinationSummary = (destination: Destination): SummaryItem | undefined => {
-  if (summary.value.type !== 'SUCCESS') return undefined;
-
-  return summary.value.data[destination.name.toLowerCase()];
-};
 
 const showSummary = (destination: Destination) => {
   if (summary.value.type !== 'SUCCESS') {
@@ -234,27 +297,11 @@ const showSummary = (destination: Destination) => {
   summaryModal.title = summaryForCountry.country;
   summaryModal.content = summaryForCountry.summary;
   summaryModal.links = summaryForCountry.links;
-  summaryModal.visible = true;
-};
-
-const getDangerousLevelColor = (destination: Destination): string | undefined => {
-  const dangerLevelColors: Record<string, string> = {
-    1: '#c5e1a5',
-    2: '#e6ee9c',
-    3: '#fff59d',
-    4: '#ffe082',
-    5: '#ffcc80',
-    6: '#ffb74d',
-    7: '#ffa726',
-    8: '#ff8a65',
-    9: '#ff7043',
-    10: '#ff5722',
+  summaryModal.riskLevel = {
+    value: summaryForCountry.dangerous_level,
+    color: getDangerLevelColor(destination),
   };
-
-  const destinationSummary = getDestinationSummary(destination);
-  if (!destinationSummary) return undefined;
-
-  return dangerLevelColors[destinationSummary.dangerous_level];
+  summaryModal.visible = true;
 };
 </script>
 
@@ -342,5 +389,15 @@ const getDangerousLevelColor = (destination: Destination): string | undefined =>
 
 .sidebar__modal-articles {
   word-wrap: break-word;
+}
+
+.summary-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.summary-modal__risk-level-icon {
+  margin-left: 5px;
 }
 </style>

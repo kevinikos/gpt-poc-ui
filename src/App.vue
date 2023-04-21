@@ -1,6 +1,10 @@
 <template>
   <div class="map-container">
-    <app-sidebar @add:destination="zoomInCountry" @remove:destination="removeCountryLayers" />
+    <app-sidebar
+      @add:destination="zoomInCountry"
+      @remove:destination="removeCountryLayers"
+      @adjust-color:destination="adjustCountryLayersColor"
+    />
     <world-map ref="worldMapRef" @update:map-state="updateMapState" />
   </div>
   <div v-if="mapState === 'LOADING'" class="loader-container">
@@ -32,6 +36,10 @@ const zoomInCountry = (countryIso: string) => {
 
 const removeCountryLayers = (countryIso: string) => {
   worldMapRef.value?.removeCountryLayers(countryIso);
+};
+
+const adjustCountryLayersColor = (countryIso: string, color: string) => {
+  worldMapRef.value?.adjustCountryLayersColor(countryIso, color);
 };
 </script>
 

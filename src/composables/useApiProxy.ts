@@ -41,8 +41,16 @@ export const useApiProxy = () => {
     }
   };
 
+  const removeDSummaryFromRecord = (destination: string) => {
+    if (summary.value.type !== 'SUCCESS') return;
+
+    const { [destination.toLowerCase()]: deleted, ...newSummary } = summary.value.data;
+    summary.value.data = newSummary;
+  };
+
   return {
     fetchSummary,
+    removeDSummaryFromRecord,
     isSummaryLoading,
     summary,
   };

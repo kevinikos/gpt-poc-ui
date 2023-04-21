@@ -176,8 +176,21 @@ const removeCountryLayers = (countryIso: string) => {
   map.removeLayer(getCountryLayerName(countryIso));
 };
 
+const adjustCountryLayersColor = (countryIso: string, color: string) => {
+  const map = mapRef.value;
+  if (!map) return;
+
+  map.once('idle', () => {
+    map.setPaintProperty(getCountryBorderLayerName(countryIso), 'line-color', color);
+    map.setPaintProperty(getCountryLayerName(countryIso), 'fill-color', color);
+  });
+
+  map.zoomTo(1);
+};
+
 defineExpose({
   zoomInCountry,
   removeCountryLayers,
+  adjustCountryLayersColor,
 });
 </script>
