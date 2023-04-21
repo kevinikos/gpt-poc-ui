@@ -15,7 +15,7 @@
 import { computed, ref } from 'vue';
 import AppSidebar from '@/components/AppSidebar.vue';
 import WorldMap from '@/components/WorldMap.vue';
-import { MapState } from '@/types/mapState';
+import { MapState } from '@/types/MapState';
 
 const worldMapRef = ref<InstanceType<typeof WorldMap> | null>(null);
 

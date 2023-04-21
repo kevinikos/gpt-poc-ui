@@ -215,7 +215,7 @@ export const countriesIsoAlpha3: Record<string, string> = {
   'Svalbard and Jan Mayen': 'SJM',
   Sweden: 'SWE',
   Switzerland: 'CHE',
-  'Syrian Arab Republic': 'SYR',
+  Syria: 'SYR',
   'Taiwan, Province of China': 'TWN',
   Tajikistan: 'TJK',
   'Tanzania, United Republic of': 'TZA',

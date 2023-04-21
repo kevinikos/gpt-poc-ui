@@ -2,7 +2,7 @@
   <div class="sidebar">
     <h2>Plan your delivery</h2>
 
-    <app-card color="#f1d624">
+    <app-card color="#6652e4">
       <form @submit.prevent="addDestination" class="sidebar__new-destination">
         <input class="sidebar__new-destination-input" v-model="newDestination" />
         <button type="submit" :disabled="!newDestination" class="sidebar__new-destination-submit">
@@ -17,10 +17,11 @@
       <ul class="sidebar__destinations">
         <app-card
           is="li"
-          :key="`${destination}-${index}`"
+          :key="`${destination.name}-${index}`"
           class="sidebar__destination"
           @click="showSummary(destination)"
           v-for="(destination, index) in destinations"
+          :color="getDangerousLevelColor(destination)"
         >
           <template v-if="editedDestination.index === index">
             <form
@@ -87,19 +88,14 @@
 </template>
 
 <script setup lang="ts">
-import {
-  computed, defineEmits, reactive, ref,
-} from 'vue';
+import { defineEmits, reactive, ref } from 'vue';
 import { countriesIsoAlpha3 } from '@/constants/countriesIso';
-import { fetchSummary, Summary } from '@/services/apiProxy';
 import AppModal from '@/components/AppModal.vue';
 import AppButton from '@/components/AppButton.vue';
 import AppCard from '@/components/AppCard.vue';
-
-type Destination = {
-  name: string;
-  iso: string;
-}
+import { Destination, EditedDestination } from '@/types/FormState';
+import { useApiProxy } from '@/composables/useApiProxy';
+import { SummaryItem } from '@/services/apiProxy';
 
 const emit = defineEmits<{(event: 'add:destination', iso: string): void;
   (event: 'remove:destination', iso: string): void
@@ -107,7 +103,7 @@ const emit = defineEmits<{(event: 'add:destination', iso: string): void;
 
 const newDestination = ref<string>('');
 const destinations = reactive<Destination[]>([]);
-const editedDestination = reactive<Destination & { index: number }>({ name: '', iso: '', index: -1 });
+const editedDestination = reactive<EditedDestination>({ name: '', iso: '', index: -1 });
 
 const addDestination = () => {
   if (!newDestination.value) return;
@@ -173,35 +169,9 @@ const updateDestination = () => {
   emit('add:destination', destinationIso);
 };
 
-type FetchState<T> =
-  | { type: 'IDLE'}
-  | { type: 'LOADING' }
-  | { type: 'SUCCESS', data: T }
-  | { type: 'ERROR', message: string };
+const { fetchSummary, summary, isSummaryLoading } = useApiProxy();
 
-const summary = ref<FetchState<Summary>>({
-  type: 'IDLE',
-});
-
-const isSummaryLoading = computed<boolean>(() => summary.value.type === 'LOADING');
-
-const prepareSummary = async () => {
-  if (isSummaryLoading.value) return;
-
-  try {
-    summary.value = { type: 'LOADING' };
-    const countries: string[] = destinations.map((destination) => destination.name);
-
-    const { data } = await fetchSummary(countries);
-    summary.value = {
-      type: 'SUCCESS',
-      data,
-    };
-  } catch (e) {
-    summary.value = { type: 'ERROR', message: (e as Error).message };
-    console.error('Error fetching summary:', e);
-  }
-};
+const prepareSummary = () => fetchSummary(destinations);
 
 type SummaryModalContent = {
   key: number;
@@ -233,6 +203,12 @@ const errorModal = reactive<ErrorModal>({
   content: '',
 });
 
+const getDestinationSummary = (destination: Destination): SummaryItem | undefined => {
+  if (summary.value.type !== 'SUCCESS') return undefined;
+
+  return summary.value.data[destination.name.toLowerCase()];
+};
+
 const showSummary = (destination: Destination) => {
   if (summary.value.type !== 'SUCCESS') {
     errorModal.key = Date.now();
@@ -243,8 +219,7 @@ const showSummary = (destination: Destination) => {
     return;
   }
 
-  const summaryForCountry = summary.value.data.find((item) => (
-    item.country.toLowerCase() === destination.name.toLowerCase()));
+  const summaryForCountry = getDestinationSummary(destination);
   if (!summaryForCountry) {
     errorModal.key = Date.now();
     errorModal.title = 'Could not find summary for country';
@@ -255,13 +230,31 @@ const showSummary = (destination: Destination) => {
 
   emit('add:destination', destination.iso);
 
-  console.log(summaryForCountry);
-
   summaryModal.key = Date.now();
   summaryModal.title = summaryForCountry.country;
   summaryModal.content = summaryForCountry.summary;
   summaryModal.links = summaryForCountry.links;
   summaryModal.visible = true;
+};
+
+const getDangerousLevelColor = (destination: Destination): string | undefined => {
+  const dangerLevelColors: Record<string, string> = {
+    1: '#c5e1a5',
+    2: '#e6ee9c',
+    3: '#fff59d',
+    4: '#ffe082',
+    5: '#ffcc80',
+    6: '#ffb74d',
+    7: '#ffa726',
+    8: '#ff8a65',
+    9: '#ff7043',
+    10: '#ff5722',
+  };
+
+  const destinationSummary = getDestinationSummary(destination);
+  if (!destinationSummary) return undefined;
+
+  return dangerLevelColors[destinationSummary.dangerous_level];
 };
 </script>
 

@@ -4,6 +4,8 @@ export type SummaryItem = {
   country: string;
   summary: string;
   links: string[];
+  // eslint-disable-next-line camelcase
+  dangerous_level: string;
 }
 export type Summary = SummaryItem[];
 

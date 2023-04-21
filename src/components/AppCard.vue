@@ -1,5 +1,5 @@
 <template>
-  <component :is="is" class="card">
+  <component :is="is ?? 'div'" class="card">
     <slot />
   </component>
 </template>
@@ -11,12 +11,12 @@ defineProps({
   color: {
     type: String,
     required: false,
-    default: () => '#6652e4',
+    default: () => '#ffffff',
   },
   is: {
     type: String,
-    required: true,
-    default: () => 'div',
+    required: false,
+    default: () => undefined,
   },
 });
 </script>
@@ -37,7 +37,7 @@ defineProps({
     width: 100%;
     height: 10px;
     background: v-bind(color);
-    opacity: 0.4;
+    //opacity: 0.4;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
   }

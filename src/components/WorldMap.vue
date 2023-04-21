@@ -8,7 +8,7 @@ import {
 } from 'vue';
 import { FilterSpecification, Map as MapLibreGLMap } from 'maplibre-gl';
 import * as turf from '@turf/turf';
-import { MapState } from '@/types/mapState';
+import { MapState } from '@/types/MapState';
 
 const SOURCE_NAME = 'countries';
 

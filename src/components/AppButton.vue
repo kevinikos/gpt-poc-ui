@@ -10,7 +10,7 @@ type ButtonSize = 'regular' | 'small';
 defineProps({
   size: {
     type: String as PropType<ButtonSize>,
-    required: true,
+    required: false,
     default: () => 'regular',
   },
 });
