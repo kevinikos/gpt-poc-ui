@@ -66,7 +66,7 @@
       </template>
     </app-button>
 
-    <AppModal v-if="summaryModal.visible" :key="summaryModal.key">
+    <app-modal v-if="summaryModal.visible" :key="summaryModal.key">
       <header class="summary-modal__header">
         <h3>{{ summaryModal.title }}</h3>
         <div>
@@ -86,14 +86,14 @@
       <ul class="sidebar__modal-articles">
         <li :key="link" v-for="link in summaryModal.links">{{ link }}</li>
       </ul>
-    </AppModal>
+    </app-modal>
 
-    <AppModal v-if="errorModal.visible" :key="errorModal.key">
+    <app-modal v-if="errorModal.visible" :key="errorModal.key">
       <h3>{{ errorModal.title }}</h3>
       <p>
         {{ errorModal.content }}
       </p>
-    </AppModal>
+    </app-modal>
   </div>
 </template>
 

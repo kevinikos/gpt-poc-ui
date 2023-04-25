@@ -33,11 +33,14 @@ const closeModal = () => {
 }
 
 .modal__content {
+  display: flex;
+  flex-direction: column;
   padding: 20px;
   box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
   background: white;
   border-radius: 5px;
   min-width: 250px;
-  max-width: 500px;
+  max-width: 800px;
+  max-height: 80vh;
 }
 </style>
