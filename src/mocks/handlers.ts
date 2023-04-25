@@ -17,10 +17,11 @@ export const handlers = [
 
     articles.push(newArticle);
 
-    return res(ctx.status(201), ctx.json(newArticle));
+    return res(ctx.delay(1000), ctx.status(201), ctx.json(newArticle));
   }),
 
   rest.get(`${process.env.VUE_APP_API_PROXY_URL}/articles`, (_req, res, ctx) => res(
+    ctx.delay(2000),
     ctx.status(200),
     ctx.json(articles),
   )),
@@ -30,12 +31,12 @@ export const handlers = [
 
     const articleIndex = articles.findIndex((article) => article.id === articleId);
     if (articleIndex === -1) {
-      return res(ctx.status(404));
+      return res(ctx.delay(1000), ctx.status(404));
     }
 
     articles.splice(articleIndex, 1);
 
-    return res(ctx.status(200), ctx.json(articles));
+    return res(ctx.delay(1000), ctx.status(200), ctx.json(articles));
   }),
 ];
 

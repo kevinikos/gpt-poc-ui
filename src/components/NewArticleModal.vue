@@ -4,7 +4,10 @@
       <h2>New Article</h2>
     </header>
 
-    <form @submit.prevent="emit('submit')" class="modal__form" id="new-article-form">
+    <form @submit.prevent="emit('submit', newArticleModal)"
+          class="modal__form"
+          id="new-article-form">
+
       <div class="modal__form-section">
         <label for="article-title">
           <div class="modal__form-field-name">Title</div>
@@ -39,22 +42,36 @@
       >
         Cancel
       </app-button>
-      <app-button type="submit" form="new-article-form">Submit</app-button>
+      <app-button type="submit" form="new-article-form">
+        <template v-if="isSubmitting">
+          Loading <font-awesome-icon :icon="['fas', 'spinner']" spin />
+        </template>
+        <template v-else>
+          Submit
+        </template>
+      </app-button>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { defineEmits, reactive } from 'vue';
+import { defineEmits, defineProps, reactive } from 'vue';
 import AppButton from '@/components/AppButton.vue';
 
-const emit = defineEmits<{(e: 'click:cancel'): void
-  (e: 'submit'): void
-}>();
-
-type NewArticleModal = {
+export type NewArticleModal = {
   title: string;
   content: string;
 }
+
+defineProps({
+  isSubmitting: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const emit = defineEmits<{(e: 'click:cancel'): void
+  (e: 'submit', article: NewArticleModal): void
+}>();
 
 const newArticleModal = reactive<NewArticleModal>({
   title: '',
