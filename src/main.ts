@@ -8,9 +8,18 @@ import { faTrashCan, faSquarePlus } from '@fortawesome/free-regular-svg-icons';
 import { router } from '@/router';
 import App from './App.vue';
 
-library.add(faPencil, faTrashCan, faDharmachakra, faSpinner, faSquarePlus, faCircle, faPlus);
+const main = async () => {
+  if (process.env.VUE_APP_MOCK_SERVICE_WORKER === 'enabled') {
+    const { worker } = await import('./mocks/browser');
+    await worker.start();
+  }
 
-createApp(App)
-  .component('font-awesome-icon', FontAwesomeIcon)
-  .use(router)
-  .mount('#app');
+  library.add(faPencil, faTrashCan, faDharmachakra, faSpinner, faSquarePlus, faCircle, faPlus);
+
+  createApp(App)
+    .component('font-awesome-icon', FontAwesomeIcon)
+    .use(router)
+    .mount('#app');
+};
+
+main();
