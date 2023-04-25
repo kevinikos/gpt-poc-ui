@@ -1,7 +1,7 @@
 <template>
   <div class="articles-page">
     <h2>List of articles</h2>
-    <div class="articles-page__content">
+    <div class="articles-page__content" v-if="!areArticlesLoading && articlesData.length">
       <div class="articles-page__articles">
         <ul v-if="articlesData.length" class="articles-page__list">
           <li v-for="article in articlesData" :key="article.id" class="articles-page__list-item">
@@ -30,12 +30,25 @@
       </h3>
     </div>
 
+    <div v-if="!areArticlesLoading && !articlesData.length">
+      <img alt="Vue logo" src="../assets/empty-list.webp">
+    </div>
+
     <div class="articles-page__actions">
-      <button class="articles-page__action-button" @click="openNewArticleModal">
+      <button
+        :disabled="areArticlesLoading"
+        class="articles-page__action-button"
+        @click="openNewArticleModal"
+      >
         <font-awesome-icon :icon="['fas', 'plus']" />
       </button>
 
-      <button class="articles-page__action-button" @click="removeArticle(selectedArticle.id)">
+      <button
+        v-if="selectedArticle"
+        :disabled="areArticlesLoading || isDeleteArticleLoading"
+        class="articles-page__action-button"
+        @click="removeArticle(selectedArticle.id)"
+      >
         <font-awesome-icon v-if="isDeleteArticleLoading" :icon="['fas', 'spinner']" spin />
         <font-awesome-icon v-else :icon="['far', 'trash-can']" />
       </button>
@@ -189,6 +202,12 @@ fetchArticles((data) => {
   &:hover {
     cursor: pointer;
     transform: scale(1.05);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: scale(1);
   }
 }
 </style>
