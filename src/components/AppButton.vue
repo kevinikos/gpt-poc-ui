@@ -18,17 +18,20 @@ defineProps({
 
 <style lang="scss" scoped>
 .button {
+  --_color: var(--color, #6652e4);
+
   background: none;
   margin-top: auto;
-  border: 2px solid #6652e4;
+  border: 2px solid var(--_color);
   border-radius: 5px;
-  color: #6652e4;
+  color: var(--_color);
   transition: all 150ms linear;
+  font-weight: 700;
 
   &:hover {
     cursor: pointer;
     color: white;
-    background: #6652e4;
+    background: var(--_color);
   }
 
   &:disabled {

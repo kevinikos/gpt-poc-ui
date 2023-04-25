@@ -23,7 +23,7 @@ defineProps({
 
 <style lang="scss" scoped>
 .card {
-  box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
   border-radius: 5px;
   display: flex;
   padding: 20px 10px 10px;
@@ -37,7 +37,6 @@ defineProps({
     width: 100%;
     height: 10px;
     background: v-bind(color);
-    //opacity: 0.4;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
   }
